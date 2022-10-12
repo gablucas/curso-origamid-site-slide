@@ -5,8 +5,68 @@ export default class Slide {
     this.dist = { finalPosition: 0, startX: 0, movement: 0 }
   }
 
+  // [15]
   transition(active) {
     this.slide.style.transition = active ? 'transform .3s' : '';
+  }
+
+  // [14]
+  changeSlideOnEnd() {
+    if (this.dist.movement > 120 && this.index.next !== undefined) {
+      this.activeNextSlide();
+      
+    } else if (this.dist.movement < -120 && this.index.prev !== undefined) {
+      this.activePrevSlide();
+      
+    } else {
+      this.changeSlide(this.index.active)
+    }
+  }
+  
+  // [13]
+  activePrevSlide() {
+    if (this.index.prev !== undefined) {
+      this.changeSlide(this.index.prev);
+    }
+  }
+
+  // [13]
+  activeNextSlide() {
+    if (this.index.next !== undefined) {
+      this.changeSlide(this.index.next);
+    }
+  }
+
+  // [12]
+  slideIndexNav(index) {
+    const last = this.slideArray.length - 1;
+    this.index = {
+      prev: index ? index - 1 : undefined,
+      active: index,
+      next: index === last ? undefined : index + 1,
+    }
+  }
+
+  // [11]
+  changeSlide(index) {
+    const activeSlide = this.slideArray[index];
+    this.moveSlide(activeSlide.position)
+    this.slideIndexNav(index);
+    this.dist.finalPosition = activeSlide.position;
+  }
+  
+  // [10]
+  slidePosition(slide) {
+    const margin = (this.wrapper.offsetWidth - slide.offsetWidth) / 2;
+    return -(slide.offsetLeft - margin);
+  }
+  
+  // [9]
+  slidesConfig() {
+    this.slideArray = [...this.slide.children].map((element) => {
+      const position = this.slidePosition(element)
+      return { position, element };
+    });
   }
 
   // [8]
@@ -35,18 +95,6 @@ export default class Slide {
     this.dist.finalPosition = this.dist.movePosition;
     this.transition(true);
     this.changeSlideOnEnd();
-  }
-
-  changeSlideOnEnd() {
-    if (this.dist.movement > 120 && this.index.next !== undefined) {
-      this.activeNextSlide();
-
-    } else if (this.dist.movement < -120 && this.index.prev !== undefined) {
-      this.activePrevSlide();
-
-    } else {
-      this.changeSlide(this.index.active)
-    }
   }
   
   // [4]
@@ -83,48 +131,7 @@ export default class Slide {
     this.onMove = this.onMove.bind(this);
     this.onEnd = this.onEnd.bind(this);
   }
-
-  // Slides config
-  slidePosition(slide) {
-    const margin = (this.wrapper.offsetWidth - slide.offsetWidth) / 2;
-    return -(slide.offsetLeft - margin);
-  }
-
-  slidesConfig() {
-    this.slideArray = [...this.slide.children].map((element) => {
-      const position = this.slidePosition(element)
-      return { position, element };
-    });
-  }
-
-  slideIndexNav(index) {
-    const last = this.slideArray.length - 1;
-    this.index = {
-      prev: index ? index - 1 : undefined,
-      active: index,
-      next: index === last ? undefined : index + 1,
-    }
-  }
-
-  changeSlide(index) {
-    const activeSlide = this.slideArray[index];
-    this.moveSlide(activeSlide.position)
-    this.slideIndexNav(index);
-    this.dist.finalPosition = activeSlide.position;
-  }
-
-  activePrevSlide() {
-    if (this.index.prev !== undefined) {
-      this.changeSlide(this.index.prev);
-    }
-  }
-
-  activeNextSlide() {
-    if (this.index.next !== undefined) {
-      this.changeSlide(this.index.next);
-    }
-  }
-
+  
   // [1]
   init() {
     this.bindEvents();
